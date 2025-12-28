@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bhuvi saying ke dhar lebe yho pe?</title>
+    <title>Neon Dark Weather Dashboard</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
@@ -15,6 +15,7 @@
             --neon-purple: #bc13fe;
             --neon-orange: #ff9d00;
             --neon-green: #0aff60;
+            --neon-modern: #341c02;
             --text-main: #ffffff;
             --text-muted: #8b9bb4;
         }
@@ -72,8 +73,8 @@
         .weather-hero { text-align: center; margin: 40px 0; position: relative; }
 
         .weather-icon {
-            height: 200px;
-            width: 200px;
+            height: 180px;
+            width: 180px;
             background: -webkit-linear-gradient(45deg, var(--neon-blue), var(--neon-purple));
             -webkit-background-clip: text; -webkit-text-fill-color: transparent;
             filter: drop-shadow(0 0 20px rgba(188, 19, 254, 0.4));
@@ -83,7 +84,7 @@
         @keyframes float { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-15px); } }
 
         .temperature {
-            font-size: 6rem; font-weight: 700; line-height: 1; margin-top: 10px;
+            font-size: 3rem; font-weight: 700; line-height: 1; margin-top: 10px;
             background: linear-gradient(to bottom, #fff, #aaa);
             -webkit-background-clip: text; -webkit-text-fill-color: transparent;
         }
@@ -118,7 +119,7 @@
 
         .card {
             background: var(--card-bg); border-radius: 30px; padding: 20px;
-            display: flex; flex-direction: row; justify-content: center;
+            display: flex; flex-direction: column; justify-content: center;
             align-items: center; position: relative; overflow: hidden;
             min-height: 200px;
         }
@@ -210,6 +211,12 @@
        cursor: pointer;
     }
 
+    .wind{
+       
+        display: flex;
+        flex-direction: row;
+    }
+
     </style>
 </head>
 <body>
@@ -233,10 +240,24 @@
                 <img src="https://bhuvnesh6.github.io/simpleWeatherApp/cloud.png.png" class="weather-icon" id="main-icon" alt="">
                 <h1 class="temperature" id="temp-display">--°</h1>
                 <div class="condition" id="condition-display">--</div>
+
+                  <h3>Wind Speed</h3>
+                  <div class="wind">
+                    
+                <div class="wind-graphic">
+                    <span class="stat-value" id="wind-val">--</span> <span class="stat-unit">km/h</span>
+                    <div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div>
+                </div>
+            
+                    
+               
+                </div>
             </div>
 
             <div class="timeline" id="timeline-container">
             </div>
+
+
         </div>
 
         <div class="details-section">
@@ -259,13 +280,24 @@
             </div>
 
             <div class="card">
-                <h3>Wind Speed</h3>
-                <div class="wind-graphic">
-                    <div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div>
+                              <h3>Air Quantity</h3>
+                <div class="multi-ring-container">
+                    <svg class="multi-ring-svg" viewBox="0 0 100 100">
+                        <circle cx="50" cy="50" r="45" stroke="#333" stroke-width="2" />
+                        <circle cx="50" cy="50" r="45" stroke="var(--neon-modern)" stroke-width="2" stroke-dasharray="283" stroke-dashoffset="100" opacity="0.3" />
+                        <circle cx="50" cy="50" r="35" stroke="#222" stroke-width="6" />
+                        <circle cx="50" cy="50" r="35" stroke="var(--neon-green)" stroke-width="6" stroke-dasharray="220" stroke-dashoffset="50" id="ring-Aqi" />
+                        
+                        <circle cx="50" cy="50" r="25" stroke="rgba(255,255,255,0.1)" stroke-width="1" />
+                    </svg>
+                    <div class="ring-content">
+                        <span class="stat-value" id="Aqi-val">--</span>
+                        
+                    </div>
+                    
                 </div>
-                <div style="margin-top: 15px; text-align: center;">
-                    <span class="stat-value" id="wind-val">--</span> <span class="stat-unit">km/h</span>
-                </div>
+                <span class="aqi_status" style="font-size: 10px;"></span>
+                <span  style="font-size: 13px;"><b style="color: #e1455c;">Main pollutant: </b><span class="aqi_status1"></span></span>
             </div>
 
             <div class="card">
@@ -321,8 +353,12 @@
         let input = document.querySelector(".cityinp")
         let btn = document.querySelector(".btn")
         let location_badge = document.querySelector(".location-badge");
-        
-        
+        let Aqi_val  = document.querySelector("#Aqi-val")
+        let aqi_status = document.querySelector(".aqi_status");
+        let aqi_status1 = document.querySelector(".aqi_status1");
+        let ringAqi = document.querySelector("#ring-Aqi");
+
+
         location_badge.addEventListener("click", ()=>{
             document.querySelector(".pop").style.display = "flex";
         })
@@ -345,11 +381,59 @@
         async function fetchWeatherData() {
     try {
         const response = await fetch(
-            `${BASE_URL}?key=${API_KEY}&q=${CITY}&aqi=no`
+            `${BASE_URL}?key=${API_KEY}&q=${CITY}&aqi=yes`
         );
 
         const data = await response.json();
         console.log("WeatherAPI Response:", data);
+
+        // ---------- AIR QUALITY (Console Only) ----------
+         let calculatedAQI = 0;
+        if (data.current && data.current.air_quality) {
+    const aq = data.current.air_quality;
+
+    const pm25 = aq.pm2_5; // µg/m³
+    const pm10 = aq.pm10;
+
+    // Calculate REAL AQI (0–500 scale)
+    const calculatedAQI = pm25ToAQI(pm25);
+
+    // AQI status from calculated AQI
+    function getAQIStatusFromValue(aqi) {
+        if (aqi <= 50) return "Good";
+        if (aqi <= 100) return "Moderate";
+        if (aqi <= 150) return "Unhealthy (Sensitive Groups)";
+        if (aqi <= 200) return "Unhealthy";
+        if (aqi <= 300) return "Very Unhealthy";
+        return "Hazardous";
+    }
+
+    const aqiStatus = getAQIStatusFromValue(calculatedAQI);
+
+    // Determine main pollutant
+    const mainPollutant = pm25 >= pm10 ? "PM2.5" : "PM10";
+    const mainValue = mainPollutant === "PM2.5" ? pm25 : pm10;
+
+     Aqi_val.innerHTML =  calculatedAQI;
+     aqi_status.innerHTML = aqiStatus;
+     if(aqiStatus === "Good"){
+        aqi_status.style.color = "green";
+     }
+     else{
+         aqi_status.style.color = "red";
+     }
+     aqi_status1.innerHTML = mainPollutant;
+    
+     const aqiColor = getAQIColor(calculatedAQI);
+ringAqi.style.stroke = aqiColor;
+aqi_status.style.color = aqiColor;
+
+const aqiPercent = Math.min((calculatedAQI / 500) * 100, 100);
+  setProgressAqi(ringAqi, aqiPercent);
+
+}
+
+
 
         // Safety check
         if (!data || !data.current) {
@@ -370,6 +454,7 @@
             icon: data.current.condition.icon
         };
 
+       
         elCity.innerText = weatherData.city;
         elTemp.innerText = `${weatherData.temp}°C`;
         elCond.innerText = weatherData.condition;
@@ -384,6 +469,7 @@
 
         elRain.innerText = weatherData.rain;
         setProgress(ringRain, weatherData.rain, 276);
+
 
     } catch (error) {
         console.error("Error fetching weather data:", error);
@@ -446,6 +532,54 @@
 }
       
         fetchWeatherData();
+
+
+        // calculating the AQi valuee 
+
+        function pm25ToAQI(pm25) {
+    const breakpoints = [
+        { bpLo: 0.0,   bpHi: 12.0,  iLo: 0,   iHi: 50 },
+        { bpLo: 12.1,  bpHi: 35.4,  iLo: 51,  iHi: 100 },
+        { bpLo: 35.5,  bpHi: 55.4,  iLo: 101, iHi: 150 },
+        { bpLo: 55.5,  bpHi: 150.4, iLo: 151, iHi: 200 },
+        { bpLo: 150.5, bpHi: 250.4, iLo: 201, iHi: 300 },
+        { bpLo: 250.5, bpHi: 350.4, iLo: 301, iHi: 400 },
+        { bpLo: 350.5, bpHi: 500.4, iLo: 401, iHi: 500 }
+    ];
+
+    for (const bp of breakpoints) {
+        if (pm25 >= bp.bpLo && pm25 <= bp.bpHi) {
+            return Math.round(
+                ((bp.iHi - bp.iLo) / (bp.bpHi - bp.bpLo)) *
+                (pm25 - bp.bpLo) + bp.iLo
+            );
+        }
+    }
+    return null;
+}
+
+//getiing colr for aqi 
+
+function getAQIColor(aqi) {
+    if (aqi <= 50) return "#00e400";
+    if (aqi <= 100) return "#ffff00";
+    if (aqi <= 150) return "#ff7e00";
+    if (aqi <= 200) return "#ff0000";
+    if (aqi <= 300) return "#8f3f97";
+    return "#7e0023";
+}
+
+
+function setProgressAqi(circle, percent) {
+    const radius = circle.r.baseVal.value;
+    const circumference = 2 * Math.PI * radius;
+
+    const offset = circumference - (percent / 100) * circumference;
+    circle.style.strokeDashoffset = offset;
+
+
+
+}
 
 
 
