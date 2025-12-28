@@ -1,63 +1,454 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Weather App</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      text-align: center;
-      margin: 50px;
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Neon Dark Weather Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --bg-dark: #0f1115;
+            --card-bg: rgba(30, 33, 45, 0.6);
+            --neon-blue: #00f2ff;
+            --neon-purple: #bc13fe;
+            --neon-orange: #ff9d00;
+            --neon-green: #0aff60;
+            --text-main: #ffffff;
+            --text-muted: #8b9bb4;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
+
+      body {
+    background:
+        radial-gradient(circle at top right, #1a1f3575 0%, #090a0f84 100%),
+        url("/2150538394.jpg");
+
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+
+    color: var(--text-main);
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+    
+}
+
+
+        .dashboard {
+            background: rgba(255, 255, 255, 0.046);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 40px;
+            padding: 40px;
+            width: 100%;
+            max-width: 1000px;
+            display: grid;
+            grid-template-columns: 1.2fr 1fr;
+            gap: 40px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+
+        .main-section { display: flex; flex-direction: column; justify-content: space-between; }
+
+        .location-badge {
+            display: inline-flex; align-items: center; gap: 10px;
+            background: rgba(255, 255, 255, 0.159); padding: 10px 20px;
+            border-radius: 30px; color: var(--text-muted); font-size: 0.9rem;
+            color: #fff;
+            cursor: pointer;
+        }
+
+        .location-badge:hover{
+            box-shadow: 0 0 12px rgba(255, 255, 255, 0.159);
+        }
+
+        .weather-hero { text-align: center; margin: 40px 0; position: relative; }
+
+        .weather-icon {
+            height: 200px;
+            width: 200px;
+            background: -webkit-linear-gradient(45deg, var(--neon-blue), var(--neon-purple));
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            filter: drop-shadow(0 0 20px rgba(188, 19, 254, 0.4));
+            animation: float 4s ease-in-out infinite;
+        }
+
+        @keyframes float { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-15px); } }
+
+        .temperature {
+            font-size: 6rem; font-weight: 700; line-height: 1; margin-top: 10px;
+            background: linear-gradient(to bottom, #fff, #aaa);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        }
+
+        .condition {
+            font-size: 1.5rem; color: var(--neon-blue); text-transform: uppercase;
+            letter-spacing: 2px; margin-top: 10px;
+        }
+
+        .timeline {
+            display: flex; gap: 20px; overflow-x: auto; padding-bottom: 10px;
+            scrollbar-width: none;
+        }
+        .timeline::-webkit-scrollbar { display: none; }
+
+        .time-slot {
+            background: rgba(255, 255, 255, 0.05); padding: 15px; border-radius: 20px;
+            text-align: center; min-width: 80px; border: 1px solid rgba(255,255,255,0.05);
+            transition: 0.3s;
+        }
+        .time-slot:hover {
+            background: rgba(255, 255, 255, 0.1); transform: translateY(-5px);
+            border-color: var(--neon-blue);
+        }
+        .ts-time { font-size: 0.8rem; color: var(--text-muted); display: block; margin-bottom: 5px; }
+        .ts-icon { font-size: 1.2rem; margin: 5px 0; color: #fff; display: block; }
+        .ts-temp { font-weight: 600; display: block; }
+
+        .details-section {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 20px;
+        }
+
+        .card {
+            background: var(--card-bg); border-radius: 30px; padding: 20px;
+            display: flex; flex-direction: row; justify-content: center;
+            align-items: center; position: relative; overflow: hidden;
+            min-height: 200px;
+        }
+
+        .card h3 {
+            color: var(--text-muted); font-size: 0.9rem; font-weight: 400;
+            margin-bottom: 10px; z-index: 2; position: absolute; top: 20px;
+        }
+
+        .multi-ring-container {
+            position: relative; width: 140px; height: 140px;
+            display: flex; justify-content: center; align-items: center;
+            margin-top: 15px;
+        }
+
+        .multi-ring-svg {
+            transform: rotate(-90deg); width: 100%; height: 100%;
+        }
+
+        circle {
+            fill: none; stroke-linecap: round;
+        }
+
+        .ring-content {
+            position: absolute; text-align: center;
+            display: flex; flex-direction: row;
+            justify-content: center; align-items: center;
+        }
+        .stat-value { font-size: 1.4rem; font-weight: 700; color: #fff; }
+        .stat-unit { font-size: 0.8rem; color: var(--text-muted); }
+
+        .wind-graphic {
+            width: 100%; height: 60px; display: flex; align-items: flex-end;
+            justify-content: center; gap: 6px; margin-top: 20px;
+        }
+        .bar {
+            width: 8px; background: var(--neon-blue); border-radius: 4px;
+            animation: windBar 1s ease-in-out infinite alternate;
+        }
+        .bar:nth-child(1) { height: 20px; animation-delay: 0.1s; }
+        .bar:nth-child(2) { height: 40px; animation-delay: 0.3s; }
+        .bar:nth-child(3) { height: 30px; animation-delay: 0.5s; }
+        .bar:nth-child(4) { height: 50px; animation-delay: 0.2s; }
+        .bar:nth-child(5) { height: 25px; animation-delay: 0.4s; }
+        @keyframes windBar { from { opacity: 0.5; transform: scaleY(0.8); } to { opacity: 1; transform: scaleY(1.2); } }
+
+        @media (max-width: 850px) {
+            .dashboard { grid-template-columns: 1fr; padding: 20px; }
+            .details-section { grid-template-columns: 1fr 1fr; }
+        }
+        @media (max-width: 480px) { .details-section { grid-template-columns: 1fr; } }
+    
+    .pop{
+        position: absolute;
+        z-index: 1;
+        height: 25vh;
+        width: 50vh;
+        background-color: #0f1115;
+        display: none;
+        flex-direction: column;
+        justify-content: center;
+        text-align: center;
+        border-radius: 16px;
+        box-shadow: rgba(255, 255, 255, 0.159);
+        padding: 15px;
     }
 
-    #weatherForm {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
+    .cityinp{
+       padding: 5px;
+       margin: 5px;
+       border: none;
+       outline: none;
+       border-radius: 10px;
+       background-color: #282828;
+       text-align: center;
+       box-shadow: rgba(255, 255, 255, 0.339);
+       color: white;
     }
 
-    #weatherResults {
-      margin-top: 20px;
+    .btn{
+         padding: 5px;
+       margin: 5px;
+       border: none;
+       outline: none;
+       border-radius: 10px;
+       background-color: #4585fb;
+       text-align: center;
+       box-shadow: rgba(255, 255, 255, 0.339);
+       cursor: pointer;
     }
-  </style>
+
+    </style>
 </head>
 <body>
-  <h1>Weather App</h1>
 
-  <form id="weatherForm">
-    <label for="cities">Enter City Names (comma-separated):</label>
-    <input type="text" id="cities" name="cities" required>
-    <button type="button" onclick="getWeather()">Get Weather</button>
-  </form>
+    <div class="pop">
+       <input type="text" class="cityinp" placeholder="Enter city name">
+       <button class="btn">See Weather</button>
+    </div>
 
-  <div id="weatherResults"></div>
+    <div class="dashboard">
+        <div class="main-section">
+            <div class="top-bar">
+                <div class="location-badge">
+                    <i class="fa-solid fa-location-dot"></i>
+                    <span id="city-name">Loading...</span>
+                </div>
+            </div>
 
-  <script>
-    async function getWeather() {
-      const citiesInput = document.getElementById('cities');
-      const weatherResults = document.getElementById('weatherResults');
+            <div class="weather-hero">
+                
+                <img src="/cloud.png.png" class="weather-icon" id="main-icon" alt="">
+                <h1 class="temperature" id="temp-display">--°</h1>
+                <div class="condition" id="condition-display">--</div>
+            </div>
 
-      const cities = citiesInput.value.split(',').map(city => city.trim());
+            <div class="timeline" id="timeline-container">
+            </div>
+        </div>
 
-      const response = await fetch('http://localhost:3000/getWeather', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ cities }),
-      });
+        <div class="details-section">
+            
+            <div class="card">
+                <h3>Humidity</h3>
+                <div class="multi-ring-container">
+                    <svg class="multi-ring-svg" viewBox="0 0 100 100">
+                        <circle cx="50" cy="50" r="45" stroke="#333" stroke-width="2" />
+                        <circle cx="50" cy="50" r="45" stroke="var(--neon-green)" stroke-width="2" stroke-dasharray="283" stroke-dashoffset="100" opacity="0.3" />
+                        <circle cx="50" cy="50" r="35" stroke="#222" stroke-width="6" />
+                        <circle cx="50" cy="50" r="35" stroke="var(--neon-green)" stroke-width="6" stroke-dasharray="220" stroke-dashoffset="50" id="ring-humidity" />
+                        <circle cx="50" cy="50" r="25" stroke="rgba(255,255,255,0.1)" stroke-width="1" />
+                    </svg>
+                    <div class="ring-content">
+                        <span class="stat-value" id="humidity-val">--</span>
+                        <span class="stat-unit">%</span>
+                    </div>
+                </div>
+            </div>
 
-      const result = await response.json();
+            <div class="card">
+                <h3>Wind Speed</h3>
+                <div class="wind-graphic">
+                    <div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div>
+                </div>
+                <div style="margin-top: 15px; text-align: center;">
+                    <span class="stat-value" id="wind-val">--</span> <span class="stat-unit">km/h</span>
+                </div>
+            </div>
 
-      if (response.ok) {
-        const weatherData = result.weatherData;
-        const weatherHtml = weatherData.map(data => `<p>${data.city}: ${data.weather}, Temperature: ${data.temperature}°C</p>`).join('');
-        weatherResults.innerHTML = weatherHtml;
-      } else {
-        weatherResults.innerHTML = `<p>Error: ${result.error}</p>`;
-      }
+            <div class="card">
+                <h3>UV Index</h3>
+                <div class="multi-ring-container">
+                    <svg class="multi-ring-svg" viewBox="0 0 100 100">
+                        <circle cx="50" cy="50" r="46" stroke="var(--neon-purple)" stroke-width="1" stroke-dasharray="4 4" opacity="0.5"/>
+                        <circle cx="50" cy="50" r="38" stroke="#222" stroke-width="5" />
+                        <circle cx="50" cy="50" r="38" stroke="var(--neon-purple)" stroke-width="5" stroke-dasharray="238" stroke-dashoffset="180" id="ring-uv" />
+                        <circle cx="50" cy="50" r="28" stroke="rgba(255,255,255,0.2)" stroke-width="3" />
+                    </svg>
+                    <div class="ring-content">
+                        <span class="stat-value" id="uv-val">--</span>
+                        <span class="stat-unit">Index</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>Rain Chance</h3>
+                <div class="multi-ring-container">
+                    <svg class="multi-ring-svg" viewBox="0 0 100 100">
+                        <circle cx="50" cy="50" r="44" stroke="#222" stroke-width="8" />
+                        <circle cx="50" cy="50" r="44" stroke="var(--neon-orange)" stroke-width="8" stroke-dasharray="276" stroke-dashoffset="100" id="ring-rain" />
+                        <circle cx="50" cy="50" r="30" stroke="var(--neon-orange)" stroke-width="2" opacity="0.4" />
+                    </svg>
+                    <div class="ring-content">
+                        <span class="stat-value" id="rain-val">--</span>
+                        <span class="stat-unit">%</span>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+       
+        const API_KEY = "c5a67a3f79f04649a4145439252607"; 
+        const BASE_URL = "https://api.weatherapi.com/v1/current.json"; 
+        let CITY = "Fardabad";
+
+        let elCity = document.getElementById('city-name');
+        const elTemp = document.getElementById('temp-display');
+        const elCond = document.getElementById('condition-display');
+        const elHum = document.getElementById('humidity-val');
+        const elWind = document.getElementById('wind-val');
+        const elUV = document.getElementById('uv-val');
+        const elRain = document.getElementById('rain-val');
+        const ringHumidity = document.getElementById('ring-humidity');
+        const ringUV = document.getElementById('ring-uv');
+        const ringRain = document.getElementById('ring-rain');
+        let input = document.querySelector(".cityinp")
+        let btn = document.querySelector(".btn")
+        let location_badge = document.querySelector(".location-badge");
+        
+        
+        location_badge.addEventListener("click", ()=>{
+            document.querySelector(".pop").style.display = "flex";
+        })
+
+        btn.addEventListener("click", ()=>{
+            CITY == input.value;
+            let CITY1 = input.value
+           elCity.innerHTML == input.value;
+           fetchWeatherData2(CITY1);
+           document.querySelector(".pop").style.display = "none";
+           
+
+        })
+
+        function setProgress(circle, percent, circumference) {
+            const offset = circumference - (percent / 100) * circumference;
+            circle.style.strokeDashoffset = offset;
+        }
+
+        async function fetchWeatherData() {
+    try {
+        const response = await fetch(
+            `${BASE_URL}?key=${API_KEY}&q=${CITY}&aqi=no`
+        );
+
+        const data = await response.json();
+        console.log("WeatherAPI Response:", data);
+
+        // Safety check
+        if (!data || !data.current) {
+            throw new Error("Invalid weather data");
+        }
+
+        const weatherData = {
+            city: data.location.name,
+            temp: Math.round(data.current.temp_c),
+            condition: data.current.condition.text,
+            humidity: data.current.humidity,
+            wind: Math.round(data.current.wind_kph),
+            uv: data.current.uv,
+            uvPercent: Math.min((data.current.uv / 11) * 100, 100),
+            rain: Number(
+  (data.current.precip_mm ? data.current.precip_mm * 10 : 0).toFixed(2)
+),
+            icon: data.current.condition.icon
+        };
+
+        elCity.innerText = weatherData.city;
+        elTemp.innerText = `${weatherData.temp}°C`;
+        elCond.innerText = weatherData.condition;
+
+        elHum.innerText = weatherData.humidity;
+        setProgress(ringHumidity, weatherData.humidity, 220);
+
+        elWind.innerText = weatherData.wind;
+
+        elUV.innerText = weatherData.uv;
+        setProgress(ringUV, weatherData.uvPercent, 238);
+
+        elRain.innerText = weatherData.rain;
+        setProgress(ringRain, weatherData.rain, 276);
+
+    } catch (error) {
+        console.error("Error fetching weather data:", error);
+        elCity.innerText = "Weather Error";
+        elTemp.innerText = "--°C";
+        elCond.innerText = "Unavailable";
     }
-  </script>
+}
+       
+        
+        async function fetchWeatherData2(CITY1) {
+    try {
+        const response = await fetch(
+            `${BASE_URL}?key=${API_KEY}&q=${CITY1}&aqi=no`
+        );
+
+        const data = await response.json();
+        console.log("WeatherAPI Response:", data);
+
+        // Safety check
+        if (!data || !data.current) {
+            throw new Error("Invalid weather data");
+        }
+
+        const weatherData = {
+            city: data.location.name,
+            temp: Math.round(data.current.temp_c),
+            condition: data.current.condition.text,
+            humidity: data.current.humidity,
+            wind: Math.round(data.current.wind_kph),
+            uv: data.current.uv,
+            uvPercent: Math.min((data.current.uv / 11) * 100, 100),
+            rain: Number(
+  (data.current.precip_mm ? data.current.precip_mm * 10 : 0).toFixed(2)
+),
+            icon: data.current.condition.icon
+        };
+
+        elCity.innerText = weatherData.city;
+        elTemp.innerText = `${weatherData.temp}°C`;
+        elCond.innerText = weatherData.condition;
+
+        elHum.innerText = weatherData.humidity;
+        setProgress(ringHumidity, weatherData.humidity, 220);
+
+        elWind.innerText = weatherData.wind;
+
+        elUV.innerText = weatherData.uv;
+        setProgress(ringUV, weatherData.uvPercent, 238);
+
+        elRain.innerText = weatherData.rain;
+        setProgress(ringRain, weatherData.rain, 276);
+
+    } catch (error) {
+        console.error("Error fetching weather data:", error);
+        elCity.innerText = "Weather Error";
+        elTemp.innerText = "--°C";
+        elCond.innerText = "Unavailable";
+    }
+}
+      
+        fetchWeatherData();
+
+
+
+    </script>
 </body>
 </html>
